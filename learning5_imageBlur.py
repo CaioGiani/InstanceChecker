@@ -30,8 +30,9 @@ class MyWidget(QWidget):
         self.img = Image.open(QFileDialog.getOpenFileName(self, "select image",'./', 'imagefile(*.png *.jpg)')[0])
         self.lbShowImg.setPixmap(QPixmap.fromImage(ImageQt.ImageQt(self.img)))
 
-    def sliderValueChange(self):
-        pass
+    def sliderValueChange(self, value):
+        self.blurPic = self.img.filter(ImageFilter.GaussianBlur(value))
+        self.lbShowImg.setPixmap(ImageQt.toqpixmap(self.blurPic))
         
 if __name__ == '__main__': 
     app = QApplication([])

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>908</width>
-    <height>705</height>
+    <width>919</width>
+    <height>713</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,29 +17,6 @@
    <bool>true</bool>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QScrollArea" name="ListInstance">
-    <property name="geometry">
-     <rect>
-      <x>660</x>
-      <y>20</y>
-      <width>231</width>
-      <height>441</height>
-     </rect>
-    </property>
-    <property name="widgetResizable">
-     <bool>true</bool>
-    </property>
-    <widget class="QWidget" name="scrollAreaWidgetContents">
-     <property name="geometry">
-      <rect>
-       <x>0</x>
-       <y>0</y>
-       <width>229</width>
-       <height>439</height>
-      </rect>
-     </property>
-    </widget>
-   </widget>
    <widget class="QPushButton" name="EditBotton">
     <property name="geometry">
      <rect>
@@ -79,26 +56,26 @@
      <string>Abort</string>
     </property>
    </widget>
-   <widget class="QTableView" name="InfoWidget">
+   <widget class="QTextBrowser" name="textBrowser">
     <property name="geometry">
      <rect>
       <x>660</x>
-      <y>580</y>
+      <y>20</y>
       <width>231</width>
-      <height>51</height>
+      <height>551</height>
      </rect>
     </property>
-    <property name="autoFillBackground">
-     <bool>false</bool>
+    <property name="frameShape">
+     <enum>QFrame::NoFrame</enum>
     </property>
     <property name="frameShadow">
      <enum>QFrame::Plain</enum>
     </property>
-    <property name="showGrid">
-     <bool>true</bool>
+    <property name="lineWidth">
+     <number>0</number>
     </property>
    </widget>
-   <widget class="QFrame" name="frameImage">
+   <widget class="QLabel" name="lbImg">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -106,6 +83,12 @@
       <width>640</width>
       <height>640</height>
      </rect>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>640</width>
+      <height>640</height>
+     </size>
     </property>
     <property name="palette">
      <palette>
@@ -242,6 +225,24 @@
           <red>0</red>
           <green>0</green>
           <blue>0</blue>
+         </color>
+        </brush>
+       </colorrole>
+       <colorrole role="PlaceholderText">
+        <brush brushstyle="SolidPattern">
+         <color alpha="127">
+          <red>0</red>
+          <green>0</green>
+          <blue>0</blue>
+         </color>
+        </brush>
+       </colorrole>
+       <colorrole role="Accent">
+        <brush brushstyle="SolidPattern">
+         <color alpha="255">
+          <red>255</red>
+          <green>255</green>
+          <blue>255</blue>
          </color>
         </brush>
        </colorrole>
@@ -382,6 +383,24 @@
          </color>
         </brush>
        </colorrole>
+       <colorrole role="PlaceholderText">
+        <brush brushstyle="SolidPattern">
+         <color alpha="127">
+          <red>0</red>
+          <green>0</green>
+          <blue>0</blue>
+         </color>
+        </brush>
+       </colorrole>
+       <colorrole role="Accent">
+        <brush brushstyle="SolidPattern">
+         <color alpha="255">
+          <red>255</red>
+          <green>255</green>
+          <blue>255</blue>
+         </color>
+        </brush>
+       </colorrole>
       </inactive>
       <disabled>
        <colorrole role="WindowText">
@@ -519,57 +538,70 @@
          </color>
         </brush>
        </colorrole>
+       <colorrole role="PlaceholderText">
+        <brush brushstyle="SolidPattern">
+         <color alpha="127">
+          <red>127</red>
+          <green>127</green>
+          <blue>127</blue>
+         </color>
+        </brush>
+       </colorrole>
+       <colorrole role="Accent">
+        <brush brushstyle="SolidPattern">
+         <color alpha="255">
+          <red>255</red>
+          <green>255</green>
+          <blue>255</blue>
+         </color>
+        </brush>
+       </colorrole>
       </disabled>
      </palette>
     </property>
+    <property name="mouseTracking">
+     <bool>true</bool>
+    </property>
+    <property name="autoFillBackground">
+     <bool>false</bool>
+    </property>
     <property name="frameShape">
-     <enum>QFrame::StyledPanel</enum>
+     <enum>QFrame::Panel</enum>
     </property>
     <property name="frameShadow">
-     <enum>QFrame::Raised</enum>
+     <enum>QFrame::Plain</enum>
     </property>
-    <widget class="QScrollBar" name="horizontalScrollBar">
-     <property name="geometry">
-      <rect>
-       <x>0</x>
-       <y>620</y>
-       <width>641</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-    <widget class="QScrollBar" name="verticalScrollBar">
-     <property name="geometry">
-      <rect>
-       <x>620</x>
-       <y>0</y>
-       <width>21</width>
-       <height>621</height>
-      </rect>
-     </property>
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-    </widget>
-    <widget class="QCheckBox" name="LabelViewCheck">
-     <property name="enabled">
-      <bool>true</bool>
-     </property>
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>10</y>
-       <width>70</width>
-       <height>17</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>View Labels</string>
-     </property>
-    </widget>
+    <property name="lineWidth">
+     <number>1</number>
+    </property>
+    <property name="midLineWidth">
+     <number>0</number>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="textFormat">
+     <enum>Qt::PlainText</enum>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QPlainTextEdit" name="plainTestEditLog">
+    <property name="geometry">
+     <rect>
+      <x>660</x>
+      <y>580</y>
+      <width>231</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::NoFrame</enum>
+    </property>
+    <property name="verticalScrollBarPolicy">
+     <enum>Qt::ScrollBarAlwaysOn</enum>
+    </property>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -577,8 +609,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>908</width>
-     <height>21</height>
+     <width>919</width>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuObjectChecker_Ver_0_01">
