@@ -10,7 +10,7 @@ class MyWidget(QWidget):
         self.btn = QPushButton('open image')
         self.btn.clicked.connect(self.openImage)
 
-
+        self.txtLabel = QLabel()
         self.lbShowImg = QLabel()
         self.slider = QSlider(Qt.Orientation.Horizontal)
         self.slider.setRange(0,20)
@@ -22,6 +22,7 @@ class MyWidget(QWidget):
         self.mainLayout = QVBoxLayout()
         self.mainLayout.addWidget(self.btn)
         self.mainLayout.addWidget(self.lbShowImg)
+        self.mainLayout.addWidget(self.txtLabel)
         self.mainLayout.addWidget(self.slider)
         self.setLayout(self.mainLayout)
 
@@ -29,11 +30,16 @@ class MyWidget(QWidget):
     def openImage(self):
         self.img = Image.open(QFileDialog.getOpenFileName(self, "select image",'./', 'imagefile(*.png *.jpg)')[0])
         self.lbShowImg.setPixmap(QPixmap.fromImage(ImageQt.ImageQt(self.img)))
+        self.showText(self.slider.value())
 
     def sliderValueChange(self, value):
         self.blurPic = self.img.filter(ImageFilter.GaussianBlur(value))
         self.lbShowImg.setPixmap(ImageQt.toqpixmap(self.blurPic))
-        
+        self.showText(value)
+
+    def showText(self, value):
+        self.txtLabel.setText(str(value))
+
 if __name__ == '__main__': 
     app = QApplication([])
     window = MyWidget()
