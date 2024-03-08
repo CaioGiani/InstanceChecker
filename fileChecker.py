@@ -86,29 +86,33 @@ class MyWindow(QMainWindow, Ui_MainWindow):
             self.plotImage(Image.open(self.curretImageDirection))
 
     def annotateImagefromText(self):
-        self.annotatedImage = Image.open(self.curretImageDirection)
-        X, Y = self.annotatedImage.size
+        self.annotatedImage = Image.open(self.curretImageDirection).resize((640, 640))
         for key in self.annotationContentDict.keys():
             category = self.annotationContentDict[key][0]
-            x = int(self.annotationContentDict[key][1] * X)
-            y = int(self.annotationContentDict[key][2] * Y)
-            w = int(self.annotationContentDict[key][3] * X)
-            h = int(self.annotationContentDict[key][4] * Y)
+            x = int(self.annotationContentDict[key][1] * 640)
+            y = int(self.annotationContentDict[key][2] * 640)
+            w = int(self.annotationContentDict[key][3] * 640)
+            h = int(self.annotationContentDict[key][4] * 640)
             xmin = x - w//2
             ymin = y - h//2
             xmax = x + w//2
             ymax = y + h//2
-            self.drawRectangularsonImage(category, xmin, ymin, xmax, ymax)
+            self.drawRectangularsonImage(key, category, xmin, ymin, xmax, ymax)
 
-    def drawRectangularsonImage(self, category, xmin, ymin, xmax, ymax):
+    def drawRectangularsonImage(self, key, category, xmin, ymin, xmax, ymax):
         draw = ImageDraw.Draw(self.annotatedImage)
         outline = tuple(map(int, self.colorIndex[self.categoryIndex.index(category)]))
         draw.rectangle([xmin, ymin, xmax, ymax], outline=outline, width=5)
         draw.text((xmin, ymin), category, fill=outline, font= ImageFont.truetype("arial.ttf", 20))
+        xcenter = (xmin+xmax)/2 - 20
+        ycenter = (ymin+ymax)/2 - 20
+        draw.text((xcenter,ycenter), str(key), fill=outline, font= ImageFont.truetype("arial.ttf", 40))
         
     
     def plotImage(self, image2plot):
-        image2plot.resize((640, 640))
+        if image2plot.size != (640, 640):
+            print(image2plot.size)
+            image2plot.resize((640, 640))
         image2plot = ImageQt.ImageQt(image2plot)
         image2plot = QPixmap.fromImage(image2plot)
         self.lbImg.setPixmap(image2plot)
