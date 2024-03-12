@@ -6,32 +6,38 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>192</width>
-    <height>186</height>
+    <width>270</width>
+    <height>159</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Annotation</string>
   </property>
-  <widget class="QLabel" name="labelForUser">
+  <widget class="QLabel" name="labelForInstance">
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>10</y>
-     <width>171</width>
-     <height>91</height>
+     <y>16</y>
+     <width>251</width>
+     <height>20</height>
     </rect>
    </property>
+   <property name="styleSheet">
+    <string notr="true">font: 10pt &quot;Arial&quot;;</string>
+   </property>
    <property name="text">
-    <string>TextLabel</string>
+    <string>Annotation Panel</string>
+   </property>
+   <property name="textFormat">
+    <enum>Qt::PlainText</enum>
    </property>
   </widget>
   <widget class="QComboBox" name="comboBoxDecision">
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>110</y>
-     <width>171</width>
+     <y>90</y>
+     <width>251</width>
      <height>22</height>
     </rect>
    </property>
@@ -40,8 +46,8 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>140</y>
-     <width>81</width>
+     <y>120</y>
+     <width>121</width>
      <height>24</height>
     </rect>
    </property>
@@ -52,14 +58,33 @@
   <widget class="QPushButton" name="pushButtonCancel">
    <property name="geometry">
     <rect>
-     <x>100</x>
-     <y>140</y>
-     <width>81</width>
+     <x>140</x>
+     <y>120</y>
+     <width>121</width>
      <height>24</height>
     </rect>
    </property>
    <property name="text">
     <string>Cancel</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="labelForDecision">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>50</y>
+     <width>251</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">font: 700 12pt &quot;Arial&quot;;</string>
+   </property>
+   <property name="text">
+    <string>Subflorescence &amp; Efflorescence</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
    </property>
   </widget>
  </widget>

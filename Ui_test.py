@@ -31,17 +31,16 @@ class Ui_MainWindow(object):
         self.actionOpen.setAutoRepeat(False)
         self.actionQuit = QAction(MainWindow)
         self.actionQuit.setObjectName(u"actionQuit")
+        self.actionUser_Manual = QAction(MainWindow)
+        self.actionUser_Manual.setObjectName(u"actionUser_Manual")
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
-        self.EditBotton = QPushButton(self.centralwidget)
-        self.EditBotton.setObjectName(u"EditBotton")
-        self.EditBotton.setGeometry(QRect(740, 530, 71, 23))
-        self.AcceptBotton = QPushButton(self.centralwidget)
-        self.AcceptBotton.setObjectName(u"AcceptBotton")
-        self.AcceptBotton.setGeometry(QRect(660, 530, 71, 23))
-        self.AbortBotton = QPushButton(self.centralwidget)
-        self.AbortBotton.setObjectName(u"AbortBotton")
-        self.AbortBotton.setGeometry(QRect(820, 530, 71, 23))
+        self.pushButtonAccept = QPushButton(self.centralwidget)
+        self.pushButtonAccept.setObjectName(u"pushButtonAccept")
+        self.pushButtonAccept.setGeometry(QRect(660, 530, 111, 23))
+        self.pushButtonAbort = QPushButton(self.centralwidget)
+        self.pushButtonAbort.setObjectName(u"pushButtonAbort")
+        self.pushButtonAbort.setGeometry(QRect(780, 530, 111, 23))
         self.textBrowser = QTextBrowser(self.centralwidget)
         self.textBrowser.setObjectName(u"textBrowser")
         self.textBrowser.setGeometry(QRect(660, 70, 231, 451))
@@ -167,6 +166,7 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menuHelp.menuAction())
         self.menuObjectChecker_Ver_0_01.addAction(self.actionOpen)
         self.menuObjectChecker_Ver_0_01.addAction(self.actionQuit)
+        self.menuHelp.addAction(self.actionUser_Manual)
 
         self.retranslateUi(MainWindow)
 
@@ -180,14 +180,29 @@ class Ui_MainWindow(object):
         self.actionOpen.setToolTip(QCoreApplication.translate("MainWindow", u"Open a folder which contains images files and lable txt files", None))
 #endif // QT_CONFIG(tooltip)
         self.actionQuit.setText(QCoreApplication.translate("MainWindow", u"Quit", None))
-        self.EditBotton.setText(QCoreApplication.translate("MainWindow", u"Edit", None))
-        self.AcceptBotton.setText(QCoreApplication.translate("MainWindow", u"Accpet", None))
-        self.AbortBotton.setText(QCoreApplication.translate("MainWindow", u"Abort", None))
+        self.actionUser_Manual.setText(QCoreApplication.translate("MainWindow", u"User Manual", None))
+        self.pushButtonAccept.setText(QCoreApplication.translate("MainWindow", u"Accpet", None))
+        self.pushButtonAbort.setText(QCoreApplication.translate("MainWindow", u"Abort", None))
+        self.textBrowser.setHtml(QCoreApplication.translate("MainWindow", u"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+"<html><head><meta name=\"qrichtext\" content=\"1\" /><meta charset=\"utf-8\" /><style type=\"text/css\">\n"
+"p, li { white-space: pre-wrap; }\n"
+"hr { height: 1px; border-width: 0; }\n"
+"li.unchecked::marker { content: \"\\2610\"; }\n"
+"li.checked::marker { content: \"\\2612\"; }\n"
+"</style></head><body style=\" font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-weight:700;\">Greatings!</span></p>\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-weight:700;\"><br /></p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Thank you for using Instance checker.</p>\n"
+""
+                        "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">You can click [Help] - [User Manual] to find more instruction.</p>\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">To start the process you have to click [File] - [Open] to open up a folder that contains the Images and Text Files. </p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">By clicking [Show Annotation], you are able to view and edit the annotation by double clicking the bouding box. You have to save or discard the changes before moving to other images.</p></body></html>", None))
         self.lbImg.setText("")
-        self.pushButtonAnnotation.setText(QCoreApplication.translate("MainWindow", u"Show Annotation", None))
+        self.pushButtonAnnotation.setText(QCoreApplication.translate("MainWindow", u"Show && Edit Annotation", None))
         self.pushButtonPrevious.setText(QCoreApplication.translate("MainWindow", u"Previous", None))
         self.pushButtonNext.setText(QCoreApplication.translate("MainWindow", u"Next", None))
-        self.plainTextEditLog.setPlainText(QCoreApplication.translate("MainWindow", u"Only for log checking?", None))
+        self.plainTextEditLog.setPlainText(QCoreApplication.translate("MainWindow", u"Logging...", None))
         self.menuObjectChecker_Ver_0_01.setTitle(QCoreApplication.translate("MainWindow", u"File", None))
         self.menuHelp.setTitle(QCoreApplication.translate("MainWindow", u"Help", None))
     # retranslateUi
