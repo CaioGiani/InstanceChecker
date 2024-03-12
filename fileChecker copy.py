@@ -108,6 +108,8 @@ class MyWindow(QMainWindow, Ui_MainWindow):
             else:  
                 self.pushButtonAnnotation.setText('Show && Edit Annotation')
                 self.plotImage(Image.open(self.curretImageDirection))
+        else:
+            self.loggingMain(f'Please click [File] - [Open] to load files first.')
 
     def annotateImagefromText(self):
         self.annotatedImage = Image.open(self.curretImageDirection).resize((640, 640))
@@ -158,6 +160,8 @@ class MyWindow(QMainWindow, Ui_MainWindow):
                     break
             else:
                 self.loggingMain(f'Please accept or cancel the modification first.')
+        else:
+            self.loggingMain(f'Please click [File] - [Open] to load files first.')
 
     def previousImage(self):
         if self.directory:
@@ -174,6 +178,8 @@ class MyWindow(QMainWindow, Ui_MainWindow):
                     break
             else:
                 self.loggingMain(f'Please accept or cancel the modification first.')
+        else:
+            self.loggingMain(f'Please click [File] - [Open] to load files first.')
 
     def mouseDoubleClickEvent(self, event):
         if self.pushButtonAnnotation.text() == 'Hide Annotation':    # Only works when the annotation is shown
@@ -215,35 +221,41 @@ class MyWindow(QMainWindow, Ui_MainWindow):
             self.annotationChanged = True
 
     def acceptAnnotationMain(self):
-        if self.annotationChanged:
-            with open(self.txt_file[self.indexImage], 'w') as file:
-                for key in self.annotationContentDict.keys():
-                    category = self.categoryIndex.index(self.annotationContentDict[key][0])
-                    x = self.annotationContentDict[key][1]
-                    y = self.annotationContentDict[key][2]
-                    w = self.annotationContentDict[key][3]
-                    h = self.annotationContentDict[key][4]
-                    file.write(f'{category} {x} {y} {w} {h}\n')
-            self.pushButtonNext.setEnabled(True)
-            self.pushButtonPrevious.setEnabled(True)
-            self.annotationChanged = False
-            self.loggingMain(f'Annotation is accepted.The txt file is renewed.')
+        if self.directory:
+            if self.annotationChanged:
+                with open(self.txt_file[self.indexImage], 'w') as file:
+                    for key in self.annotationContentDict.keys():
+                        category = self.categoryIndex.index(self.annotationContentDict[key][0])
+                        x = self.annotationContentDict[key][1]
+                        y = self.annotationContentDict[key][2]
+                        w = self.annotationContentDict[key][3]
+                        h = self.annotationContentDict[key][4]
+                        file.write(f'{category} {x} {y} {w} {h}\n')
+                self.pushButtonNext.setEnabled(True)
+                self.pushButtonPrevious.setEnabled(True)
+                self.annotationChanged = False
+                self.loggingMain(f'Annotation is accepted.The txt file is renewed.')
+            else:
+                self.loggingMain(f'No modification is made.')
         else:
-            self.loggingMain(f'No modification is made.')
+            self.loggingMain(f'Please click [File] - [Open] to load files first.')
         
     def cancelAnnotationMain(self):
-        if self.annotationChanged:
-            self.pushButtonNext.setEnabled(True)
-            self.pushButtonPrevious.setEnabled(True)
-            self.annotationChanged = False
-            self.readText()
-            if self.pushButtonAnnotation.text() == 'Show && Edit Annotation':
-                self.plotImage(self.annotatedImage)
+        if self.directory:
+            if self.annotationChanged:
+                self.pushButtonNext.setEnabled(True)
+                self.pushButtonPrevious.setEnabled(True)
+                self.annotationChanged = False
+                self.readText()
+                if self.pushButtonAnnotation.text() == 'Show && Edit Annotation':
+                    self.plotImage(Image.open(self.curretImageDirection))
+                else:
+                    self.plotImage(self.annotatedImage)
+                self.loggingMain(f'Annotation is cancelled.')
             else:
-                self.plotImage(Image.open(self.curretImageDirection))
-            self.loggingMain(f'Annotation is cancelled.')
+                self.loggingMain(f'No modification is to be canceled.')
         else:
-            self.loggingMain(f'No modification is to be canceled.')
+            self.loggingMain(f'Please click [File] - [Open] to load files first.')
     
     def sendValue(self, value):
         self.sendValueToSub.emit(value)
