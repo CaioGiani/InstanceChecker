@@ -71,7 +71,9 @@ class MyWindow(QMainWindow, Ui_MainWindow):
                     file_list.append(self.directory + '/' + file)
             for file in file_list:
                 checkTxtDirection = (os.path.splitext(file)[0] + '.txt')
-                assert os.path.exists(checkTxtDirection), "No txt file found" 
+                if not os.path.exists(checkTxtDirection):
+                    self.loggingMain(f'Annotation file for {os.path.basename(file)} does not exist.')
+                    open(checkTxtDirection, 'w').close()
                 txt_file.append(checkTxtDirection)
             self.imageFiles = file_list
             self.txt_file = txt_file
