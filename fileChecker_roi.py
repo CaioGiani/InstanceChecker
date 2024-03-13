@@ -1,5 +1,5 @@
-from PySide6.QtWidgets import QApplication, QMainWindow, QPushButton, QLabel, QVBoxLayout, QLineEdit, QFileDialog, QTextBrowser, QWidget, QMessageBox
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtWidgets import QApplication, QMainWindow, QPushButton, QLabel, QVBoxLayout, QLineEdit, QFileDialog, QTextBrowser, QWidget, QMessageBox, QRubberBand
+from PySide6.QtCore import Qt, Signal, QRect, QSize
 import os
 from PySide6.QtGui import QPixmap
 from Ui_test import Ui_MainWindow
@@ -12,10 +12,10 @@ class MyWindow(QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
-        self.annotationChanged = False
-        self.categoryIndex = [  'BiologicalColonization',           'Plant',         'Discoloration',     'Crust&Deposit',
-                                'Subflorescence&efflorescence',     'Graffiti',      'Alveolization',     'Erosion',
-                                'Peeling',                          'Delamination',  'Crack',             'Disintegration'
+        self.annotationChanged = False  
+        self.categoryIndex = [  'BiologicalColonization',                  'Plant',          'Discoloration',              'Crust&Deposit',
+                                'Subflorescence & Efflorescence',       'Graffiti',          'Alveolization',                    'Erosion',
+                                'Peeling',                          'Delamination',                  'Crack',             'Disintegration'
                             ]
         self.categoryIndexForShort = [  'COL',          'PLT',         'CHR',     'CRU',
                                         'SNE',          'GRA',         'ALV',     'ERO',
@@ -27,6 +27,11 @@ class MyWindow(QMainWindow, Ui_MainWindow):
                             ]    
         self.AnnotationWindow = AnnotationWindow(self)
         self.directory = False
+        self.regionOfInterest = None
+        self.rubberBandAnnotation = QRubberBand(QRubberBand.Rectangle, self.lbImg)
+        self.rubberBandAnnotation.setStyleSheet("border: 2px solid red;")
+        self.regionOfInterest_startpoint = None
+        self.thresholdIoU = 0.5
         self.bind()
   
     def bind(self):
@@ -39,6 +44,7 @@ class MyWindow(QMainWindow, Ui_MainWindow):
         self.pushButtonAccept.clicked.connect(self.acceptAnnotationMain)
         self.pushButtonAbort.clicked.connect(self.cancelAnnotationMain)
         self.sendValueToSub.connect(self.AnnotationWindow.setTextToPlot)   
+        self.pushButtonAddInstance.clicked.connect(self.addInstance)
 
     def showManual(self):
         textInformation  = "1. Open the directory of the images and the corresponding txt files.\n\n"
@@ -51,6 +57,7 @@ class MyWindow(QMainWindow, Ui_MainWindow):
 
     def loggingMain(self, text):
         self.plainTextEditLog.appendPlainText(text)
+        self.plainTextEditLog.verticalScrollBar().setValue(self.plainTextEditLog.verticalScrollBar().maximum())
 
     def openFile(self):
         self.directory = QFileDialog.getExistingDirectory(self, "Select Directory")
@@ -78,6 +85,12 @@ class MyWindow(QMainWindow, Ui_MainWindow):
             self.loggingMain(f'{self.numberOfImages} images are loaded from {self.directory}')
 
     def readText(self):
+        '''
+        Read the txt file and store the content in a dict
+        return: dict, the content of the txt file, in whcih
+                key: int, the index of the annotation, starting from 0
+                value: list, the category:str, x:float, y, w, h of the annotation
+        '''
         textFileDirectory = self.txt_file[self.indexImage]
         self.annotationContentDict = dict()
         with open(textFileDirectory, 'r') as file:
@@ -90,7 +103,8 @@ class MyWindow(QMainWindow, Ui_MainWindow):
                 y = float(line[2])
                 w = float(line[3])
                 h = float(line[4])
-                self.annotationContentDict[i] = [self.categoryIndex[category], x, y, w, h]
+                #the dict contains the category:str, x:float, y, w, h of the annotation
+                self.annotationContentDict[i] = [self.categoryIndex[category], x, y, w, h]     
         self.writeText()
         self.annotateImagefromText()
 
@@ -126,6 +140,12 @@ class MyWindow(QMainWindow, Ui_MainWindow):
             self.drawRectangularsonImage(key, category, xmin, ymin, xmax, ymax)
 
     def drawRectangularsonImage(self, key, category, xmin, ymin, xmax, ymax):
+        '''
+        Draw the rectangular on the image with the category and the key
+        key: int, the index of the annotation
+        category: str, the category of the annotation
+        xmin, ymin, xmax, ymax: int, the coordinates of the rectangular
+        '''
         draw = ImageDraw.Draw(self.annotatedImage)
         outline = tuple(map(int, self.colorIndex[self.categoryIndex.index(category)]))
         draw.rectangle([xmin, ymin, xmax, ymax], outline=outline, width=5)
@@ -203,22 +223,38 @@ class MyWindow(QMainWindow, Ui_MainWindow):
                         break
 
     def modificationAnnotation(self, decision):
-        if decision == 'Delete':
-            del self.annotationContentDict[self.annotatingKey]
-            self.annotationContentDict = dict(enumerate(self.annotationContentDict.values()))
-            self.annotationContentDict = {k: v for k, v in self.annotationContentDict.items()}
-            self.writeText()
-            self.annotateImagefromText()
-            self.plotImage(self.annotatedImage)
-            self.loggingMain(f'Annotation No.{self.annotatingKey} is deleted. \nClick Accept to save the change.')
-            self.annotationChanged = True
-        else:
-            self.annotationContentDict[self.annotatingKey][0] = decision
-            self.writeText()
-            self.annotateImagefromText()
-            self.plotImage(self.annotatedImage)
-            self.loggingMain(f'Annotation No.{self.annotatingKey} is modified to {decision}. \nClick Accept to save the change.')
-            self.annotationChanged = True
+        if self.annotatingKey == len(self.annotationContentDict):
+            self.rubberBandAnnotation.close()
+            if decision == 'Deleted':
+                self.loggingMain(f'No annotation is made.')                
+            else:
+                x = self.regionOfInterest[0]/640 + (self.regionOfInterest[2]-self.regionOfInterest[0])/1280
+                y = self.regionOfInterest[1]/640 + (self.regionOfInterest[3]-self.regionOfInterest[1])/1280
+                w = (self.regionOfInterest[2]-self.regionOfInterest[0])/640
+                h = (self.regionOfInterest[3]-self.regionOfInterest[1])/640
+                self.annotationContentDict[self.annotatingKey] = [decision, x, y, w, h]
+                self.writeText()
+                self.annotateImagefromText()
+                self.plotImage(self.annotatedImage)
+                self.loggingMain(f'New annotation is added. \nClick Accept to save the change.')
+                self.annotationChanged = True
+        else:            
+            if decision == 'Deleted':
+                del self.annotationContentDict[self.annotatingKey]
+                self.annotationContentDict = dict(enumerate(self.annotationContentDict.values()))
+                self.annotationContentDict = {k: v for k, v in self.annotationContentDict.items()}
+                self.writeText()
+                self.annotateImagefromText()
+                self.plotImage(self.annotatedImage)
+                self.loggingMain(f'Annotation No.{self.annotatingKey} is deleted. \nClick Accept to save the change.')
+                self.annotationChanged = True
+            else:
+                self.annotationContentDict[self.annotatingKey][0] = decision
+                self.writeText()
+                self.annotateImagefromText()
+                self.plotImage(self.annotatedImage)
+                self.loggingMain(f'Annotation No.{self.annotatingKey} is modified to {decision}. \nClick Accept to save the change.')
+                self.annotationChanged = True
 
     def acceptAnnotationMain(self):
         if self.directory:
@@ -260,6 +296,66 @@ class MyWindow(QMainWindow, Ui_MainWindow):
     def sendValue(self, value):
         self.sendValueToSub.emit(value)
 
+    def markRegionOfInterest(self):
+        return self.regionOfInterest
+
+    def mousePressEvent(self, event):
+        if self.pushButtonAnnotation.text() == 'Hide Annotation':
+            self.regionOfInterest_startpoint = event.position().toPoint()
+            self.rubberBandAnnotation.setGeometry(self.regionOfInterest_startpoint.x()-5, self.regionOfInterest_startpoint.y()-15, 0, 0)
+            self.rubberBandAnnotation.show()
+
+    def mouseMoveEvent(self, event):
+        if self.pushButtonAnnotation.text() == 'Hide Annotation':
+            if self.regionOfInterest_startpoint:
+                selectdRect = QRect(self.regionOfInterest_startpoint.x()-5,
+                                    self.regionOfInterest_startpoint.y()-15,
+                                    event.position().toPoint().x() - self.regionOfInterest_startpoint.x()-5,
+                                    event.position().toPoint().y() - self.regionOfInterest_startpoint.y()-15
+                                    )
+                self.rubberBandAnnotation.setGeometry(selectdRect.normalized())
+
+    def mouseReleaseEvent(self, event):
+        if self.pushButtonAnnotation.text() == 'Hide Annotation':
+            selectedRect = self.rubberBandAnnotation.geometry()
+            imageRect = self.lbImg.geometry()
+            rectIntersected = selectedRect.intersected(imageRect)
+            if selectedRect.isValid() and rectIntersected.width() > 40 and rectIntersected.height() > 40:
+                self.regionOfInterest = rectIntersected.getCoords()
+                self.loggingMain(f'New boundingbox is made, double click button [+] to add the annotatation.')
+            else:
+                self.rubberBandAnnotation.close()
+
+    def addInstance(self):
+        if self.regionOfInterest:
+            #for each annotation, check the intersection over union is over a threshold
+            #if yes, then the annotation is not added
+            #if no, then the annotation is added
+            annotationPermission = True
+            xminbb = (self.regionOfInterest[0]-10)/640
+            yminbb = (self.regionOfInterest[1]-10)/640
+            xmaxbb = (self.regionOfInterest[2]-10)/640
+            ymaxbb = (self.regionOfInterest[3]-10)/640
+            bbNew = [xminbb, yminbb, xmaxbb, ymaxbb]
+            for key in self.annotationContentDict.keys():
+                xminanno = self.annotationContentDict[key][1] - self.annotationContentDict[key][3]/2
+                yminanno = self.annotationContentDict[key][2] - self.annotationContentDict[key][4]/2
+                xmaxanno = self.annotationContentDict[key][1] + self.annotationContentDict[key][3]/2
+                ymaxanno = self.annotationContentDict[key][2] + self.annotationContentDict[key][4]/2
+                bbPrev = [xminanno, yminanno, xmaxanno, ymaxanno]
+                if bbIoU(bbNew, bbPrev) > self.thresholdIoU:
+                    self.loggingMain(f'The new annotation is overlapped with instance {key}.')
+                    annotationPermission = False
+            if annotationPermission:
+                self.annotatingKey = len(self.annotationContentDict)
+                self.sendValueToSub.emit('new')
+                self.AnnotationWindow.show()
+            
+
+        else:
+            self.loggingMain(f'Please mark the bounding box first.')
+
+
 class AnnotationWindow(QWidget, Ui_AnnotationWindow):
     sendValueToMain = Signal(object)
 
@@ -279,28 +375,48 @@ class AnnotationWindow(QWidget, Ui_AnnotationWindow):
         self.sendValueToMain.connect(self.parent.modificationAnnotation)
 
     def setTextToPlot(self,value):
-        self.key = value
-        self.labelForInstance.setText(f'No.{self.key} instance is to be ...')
-        self.labelForDecision.setText(f'{self.comboBoxDecision.currentText()}')
+        if value == 'new':
+            self.labelForInstance.setText(f'New instance is to be ...')
+            self.labelForDecision.setText(f'{self.comboBoxDecision.currentText()}')
+        else:
+            self.key = value
+            self.labelForInstance.setText(f'No.{self.key} instance is to be ...')
+            self.labelForDecision.setText(f'{self.comboBoxDecision.currentText()}')
 
     def setComboBox(self):
-        itemList_combobox = ['Select Decision']
+        itemList_combobox = ['---Select Decision---']
         itemList_combobox.extend(self.parent.categoryIndex)
-        itemList_combobox.append('Delete')
+        itemList_combobox.append('Deleted')
         self.comboBoxDecision.addItems(itemList_combobox)
 
     def changeLabel(self):
         self.labelForDecision.setText(f'{self.comboBoxDecision.currentText()}')
-        if self.comboBoxDecision.currentText() != 'Select Decision': 
+        if self.comboBoxDecision.currentText() != '---Select Decision---': 
             self.pushButtonAccept.setEnabled(True)
 
     def acceptAnnotation(self):
-        if self.comboBoxDecision.currentText() != 'Select Decision':
+        if self.comboBoxDecision.currentText() != '---Select Decision---':
             self.sendValueToMain.emit(self.comboBoxDecision.currentText())
             self.close()        
 
     def cancelAnnotation(self):
         self.close()
+
+def bbIoU(bb1, bb2):
+    '''
+    Calculate the intersection over union of two bounding boxes
+    bb1, bb2: list, [xmin, ymin, xmax, ymax]
+    return: float, the intersection over union of the two bounding boxes
+    '''
+    x1, y1, x2, y2 = bb1
+    x3, y3, x4, y4 = bb2
+    x5 = max(x1, x3)
+    y5 = max(y1, y3)
+    x6 = min(x2, x4)
+    y6 = min(y2, y4)
+    intersection = max(0, x6 - x5) * max(0, y6 - y5)
+    union = (x2 - x1) * (y2 - y1) + (x4 - x3) * (y4 - y3) - intersection
+    return intersection / union
 
 if __name__ == '__main__':
     app = QApplication([])
