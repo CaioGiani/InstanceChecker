@@ -1,10 +1,21 @@
 from PySide6.QtWidgets import QApplication, QMainWindow, QPushButton, QLabel, QVBoxLayout, QLineEdit, QFileDialog, QTextBrowser, QWidget, QMessageBox, QRubberBand
 from PySide6.QtCore import Qt, Signal, QRect, QSize
 import os
-from PySide6.QtGui import QPixmap
-from Ui_test import Ui_MainWindow
-from Ui_AnnotationWindow import Ui_AnnotationWindow
+from PySide6.QtGui import QPixmap, QIcon
+from Ui_WindowMain import Ui_MainWindow
+from Ui_WindowAnnotation import Ui_AnnotationWindow
 from PIL import Image, ImageQt, ImageDraw, ImageFont
+
+# import sys
+# if getattr(sys, 'frozen', False):
+#     # in a PyInstaller bundle
+#     basedir = os.path.dirname(sys.executable)
+# else:
+#     # in a normal Python environment
+#     basedir = os.path.dirname(os.path.abspath(__file__)) 
+
+
+basedir = os.path.dirname(__file__)
 
 class MyWindow(QMainWindow, Ui_MainWindow):
     sendValueToSub = Signal(object)
@@ -47,12 +58,18 @@ class MyWindow(QMainWindow, Ui_MainWindow):
         self.pushButtonAddInstance.clicked.connect(self.addInstance)
 
     def showManual(self):
-        textInformation  = "1. Open the directory of the images and the corresponding txt files.\n\n"
-        textInformation += "2. Click 'Show && Edit Annotation' to show the annotation of the current image.\n\n"
-        textInformation += "3. Click 'Next' or 'Previous' to switch to the next or previous image.\n\n"
-        textInformation += "4. Double click on the image to modify the annotation.\n\n"
-        textInformation += "5. Click 'Quit' to exit the program.\n\n"
-        textInformation += "In case of any question, please contact kai.zhang@polimi.it or chiara.mea@mail.polimi.it"
+        textInformation  = "Thank you for using the annotation tool.\n\n"
+        textInformation += "Here are some brief instructions of how to use this app:\n\n"
+        textInformation += "1. Click [File] - [Open] to load the folder of the images and txt files.\n\n"
+        textInformation += "2. Click 'Show && Edit Annotation' to show the annotation of the current image.\n"
+        textInformation += "   You can double click an existing box to edit previous annotation.\n\n"
+        textInformation += "3. You can also drag a box and click [+] to add new annotation.\n"
+        textInformation += "   Notice that the new annotation will not be added if the overlap is over 0.5.\n\n"
+        textInformation += "4. Click [Accept] or [Abort] to save or cancel the modification.\n\n"
+        textInformation += "5. Click 'Next' or 'Previous' to switch to the next or previous image.\n\n"
+        # textInformation += "6. \n\n"
+        # textInformation += "7. \n\n"
+        textInformation += "In case of any question, please contact kai.zhang@polimi.it"
         QMessageBox.information(self, "User Manual", textInformation)
 
     def loggingMain(self, text):
@@ -422,6 +439,7 @@ def bbIoU(bb1, bb2):
 
 if __name__ == '__main__':
     app = QApplication([])
+    app.setWindowIcon(QIcon(os.path.join(basedir, 'Checker.ico')))
     window = MyWindow()
     window.show()
     app.exec()
