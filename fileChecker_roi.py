@@ -362,9 +362,10 @@ class MyWindow(QMainWindow, Ui_MainWindow):
                 xmaxanno = self.annotationContentDict[key][1] + self.annotationContentDict[key][3]/2
                 ymaxanno = self.annotationContentDict[key][2] + self.annotationContentDict[key][4]/2
                 bbPrev = [xminanno, yminanno, xmaxanno, ymaxanno]
-                if bbIoU(bbNew, bbPrev) > self.thresholdIoU:
+                if bbIntersectionofEach(bbNew, bbPrev)[0] > self.thresholdIoU or bbIntersectionofEach(bbNew, bbPrev)[1] > self.thresholdIoU:
                     self.loggingMain(f'The new annotation is overlapped with instance {key}.')
                     annotationPermission = False
+                    break
             if annotationPermission:
                 self.annotatingKey = len(self.annotationContentDict)
                 self.sendValueToSub.emit('new')
@@ -421,7 +422,7 @@ class AnnotationWindow(QWidget, Ui_AnnotationWindow):
     def cancelAnnotation(self):
         self.close()
 
-def bbIoU(bb1, bb2):
+def bbIntersectionofEach(bb1, bb2):
     '''
     Calculate the intersection over union of two bounding boxes
     bb1, bb2: list, [xmin, ymin, xmax, ymax]
@@ -434,8 +435,9 @@ def bbIoU(bb1, bb2):
     x6 = min(x2, x4)
     y6 = min(y2, y4)
     intersection = max(0, x6 - x5) * max(0, y6 - y5)
-    union = (x2 - x1) * (y2 - y1) + (x4 - x3) * (y4 - y3) - intersection
-    return intersection / union
+    area1 = (x2 - x1) * (y2 - y1)
+    area2 = (x4 - x3) * (y4 - y3)
+    return [intersection/area1, intersection/area2]
 
 if __name__ == '__main__':
     app = QApplication([])
