@@ -25,7 +25,8 @@ In order to start you have to:
     You can double click an existing box to edit previous annotation.
     ![Interface_main_shownHide](docs/Interface_main_shownHide.png)
 3. You can also drag a box and click **[+]** to add new annotation.
-   ==Notice that the new annotation will not be added if the annotation has overlap ratio with existing bounding box over **50%**.==
+   >Notice that the new annotation will not be added if the annotation has overlap ratio with existing bounding box over **50%**.
+  
    ![Interface_main_Overlap](docs/Interface_main_Overlap.png)
    It's prefered that you annotate with smaller and continuous bounding boxes for objects that takes the diagonal area of the corresponding area. In this way, it's possible also to annotate the part that is left.
    ![Interface_annoationMode](docs/Interface_annoationMode.png)
@@ -35,7 +36,7 @@ In order to start you have to:
    ![Interface_annotation_list](docs/Interface_annotation_list.png)
 4. You can also double click the existing box to edit current annotation.
 5. Click **[Accept]** or **[Abort]** to save or cancel the modification.
-    ==Note that if you don't do that, the software will not allow you to go to other images.==
+    >Note that if you don't do that, the software will not allow you to go to other images.
 6. Click '**Next**' or '**Previous**' to switch to the next or previous image.
 
 ### Contact Information
@@ -46,7 +47,7 @@ We will be happy to recieve your comment and suggestion.
 - [ ] Make possible setting of image size.
 - [ ] Make possible editting the category list.
 
-### How to export the soft ware
+### How to export the software
 If you want to check the UI, you can [Download QtDesigner](https://build-system.fman.io/qt-designer-download)
 To generate your own executive files, you can go: [Export to macos](https://pythonguis.com/tutorials/packaging-pyside6-applications-pyinstaller-macos-dmg/) and [Export to exe](https://www.pythonguis.com/tutorials/packaging-pyside6-applications-windows-pyinstaller-installforge/)
 > Note: run this in the console: `pyinstaller --onefile --noconsole --icon=docs/Checker.ico  --name "InstanceChecker" InstanceChecker_roi.py` to generate only one exe file for windows.
