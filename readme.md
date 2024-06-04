@@ -1,5 +1,9 @@
+<<<<<<< HEAD
 ![logo](docs/logo.png)
 # FileChecker
+=======
+# InstanceChecker
+>>>>>>> a16f34e5afd27d0d5195392c778418f71cddced4
 **Powered by 3DSurveyGroup|DABC|Politecnico di Milano**
 ***
 ### Introduction
