@@ -2,8 +2,8 @@ from PySide6.QtWidgets import QApplication, QMainWindow, QPushButton, QLabel, QV
 from PySide6.QtCore import Qt, Signal, QRect, QSize
 import os
 from PySide6.QtGui import QPixmap, QIcon
-from Ui_WindowMain import Ui_MainWindow
-from Ui_WindowAnnotation import Ui_AnnotationWindow
+from UI.Ui_WindowMain import Ui_MainWindow
+from UI.Ui_WindowAnnotation import Ui_AnnotationWindow
 from PIL import Image, ImageQt, ImageDraw, ImageFont
 
 # import sys
@@ -126,6 +126,8 @@ class MyWindow(QMainWindow, Ui_MainWindow):
                 self.annotationContentDict[i] = [self.categoryIndex[category], x, y, w, h]     
         self.writeText()
         self.annotateImagefromText()
+
+
 
     def writeText(self):
         content = 'Annotation Content:\n\n'
