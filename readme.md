@@ -1,4 +1,4 @@
-# FileChecker
+# InstanceChecker
 **Powered by 3DSurveyGroup|DABC|Politecnico di Milano**
 ***
 ### Introduction
