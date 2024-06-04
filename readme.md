@@ -1,3 +1,4 @@
+![logo](docs/logo.png)
 # FileChecker
 **Powered by 3DSurveyGroup|DABC|Politecnico di Milano**
 ***
@@ -48,7 +49,7 @@ We will be happy to recieve your comment and suggestion.
 ### How to export the soft ware
 If you want to check the UI, you can [Download QtDesigner](https://build-system.fman.io/qt-designer-download)
 To generate your own executive files, you can go: [Export to macos](https://pythonguis.com/tutorials/packaging-pyside6-applications-pyinstaller-macos-dmg/) and [Export to exe](https://www.pythonguis.com/tutorials/packaging-pyside6-applications-windows-pyinstaller-installforge/)
-> Note: run this in the console: `pyinstaller --onefile --noconsole --icon=Checker.ico  --name "fileChecker" fileChecker_roi.py` to generate only one exe file for windows.
+> Note: run this in the console: `pyinstaller --onefile --noconsole --icon=docs/Checker.ico  --name "InstanceChecker" InstanceChecker_roi.py` to generate only one exe file for windows.
 
 <!--
 
