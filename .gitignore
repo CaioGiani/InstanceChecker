@@ -2,4 +2,5 @@ OldShitToRemove/
 build/
 readme.pdf
 InstanceChecker.spec
+__pycache__/
 
