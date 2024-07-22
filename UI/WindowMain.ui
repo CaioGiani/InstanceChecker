@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>905</width>
-    <height>714</height>
+    <width>1298</width>
+    <height>891</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,8 +20,8 @@
    <widget class="QPushButton" name="pushButtonAccept">
     <property name="geometry">
      <rect>
-      <x>660</x>
-      <y>530</y>
+      <x>1060</x>
+      <y>529</y>
       <width>111</width>
       <height>23</height>
      </rect>
@@ -33,8 +33,8 @@
    <widget class="QPushButton" name="pushButtonAbort">
     <property name="geometry">
      <rect>
-      <x>780</x>
-      <y>530</y>
+      <x>1180</x>
+      <y>529</y>
       <width>111</width>
       <height>23</height>
      </rect>
@@ -46,8 +46,8 @@
    <widget class="QTextBrowser" name="textBrowser">
     <property name="geometry">
      <rect>
-      <x>660</x>
-      <y>70</y>
+      <x>1060</x>
+      <y>69</y>
       <width>231</width>
       <height>451</height>
      </rect>
@@ -83,14 +83,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <rect>
       <x>10</x>
       <y>10</y>
-      <width>640</width>
-      <height>640</height>
+      <width>1041</width>
+      <height>831</height>
      </rect>
     </property>
     <property name="minimumSize">
      <size>
-      <width>640</width>
-      <height>640</height>
+      <width>1041</width>
+      <height>831</height>
      </size>
     </property>
     <property name="palette">
@@ -599,7 +599,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
    <widget class="QPushButton" name="pushButtonAnnotation">
     <property name="geometry">
      <rect>
-      <x>660</x>
+      <x>1060</x>
       <y>10</y>
       <width>231</width>
       <height>24</height>
@@ -612,7 +612,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
    <widget class="QPushButton" name="pushButtonPrevious">
     <property name="geometry">
      <rect>
-      <x>660</x>
+      <x>1060</x>
       <y>40</y>
       <width>111</width>
       <height>24</height>
@@ -625,7 +625,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
    <widget class="QPushButton" name="pushButtonNext">
     <property name="geometry">
      <rect>
-      <x>780</x>
+      <x>1180</x>
       <y>40</y>
       <width>111</width>
       <height>24</height>
@@ -638,10 +638,10 @@ li.checked::marker { content: &quot;\2612&quot;; }
    <widget class="QPlainTextEdit" name="plainTextEditLog">
     <property name="geometry">
      <rect>
-      <x>660</x>
+      <x>1060</x>
       <y>560</y>
       <width>231</width>
-      <height>91</height>
+      <height>281</height>
      </rect>
     </property>
     <property name="frameShape">
@@ -660,8 +660,8 @@ li.checked::marker { content: &quot;\2612&quot;; }
    <widget class="QPushButton" name="pushButtonAddInstance">
     <property name="geometry">
      <rect>
-      <x>860</x>
-      <y>491</y>
+      <x>1260</x>
+      <y>490</y>
       <width>20</width>
       <height>20</height>
      </rect>
@@ -686,12 +686,13 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </property>
    </widget>
   </widget>
+  <widget class="QStatusBar" name="statusbar"/>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>905</width>
+     <width>1298</width>
      <height>22</height>
     </rect>
    </property>
@@ -700,6 +701,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <string>File</string>
     </property>
     <addaction name="actionOpen"/>
+    <addaction name="actionCategories_Setting"/>
     <addaction name="actionQuit"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
@@ -708,10 +710,16 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </property>
     <addaction name="actionUser_Manual"/>
    </widget>
+   <widget class="QMenu" name="menuEdit">
+    <property name="title">
+     <string>Edit</string>
+    </property>
+    <addaction name="actionMap_annotation"/>
+   </widget>
    <addaction name="menuObjectChecker_Ver_0_01"/>
+   <addaction name="menuEdit"/>
    <addaction name="menuHelp"/>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
   <action name="actionOpen">
    <property name="text">
     <string>Open</string>
@@ -731,6 +739,16 @@ li.checked::marker { content: &quot;\2612&quot;; }
   <action name="actionUser_Manual">
    <property name="text">
     <string>User Manual</string>
+   </property>
+  </action>
+  <action name="actionMap_annotation">
+   <property name="text">
+    <string>Map annotation</string>
+   </property>
+  </action>
+  <action name="actionCategories_Setting">
+   <property name="text">
+    <string>Project Setting</string>
    </property>
   </action>
  </widget>

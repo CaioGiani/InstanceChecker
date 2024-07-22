@@ -23,19 +23,25 @@ class MyWindow(QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
-        self.annotationChanged = False  
-        self.categoryIndex = [  'BiologicalColonization',                  'Plant',          'Discoloration',              'Crust&Deposit',
-                                'Subflorescence & Efflorescence',       'Graffiti',          'Alveolization',                    'Erosion',
-                                'Peeling',                          'Delamination',                  'Crack',             'Disintegration'
-                            ]
-        self.categoryIndexForShort = [  'COL',          'PLT',         'CHR',     'CRU',
-                                        'SNE',          'GRA',         'ALV',     'ERO',
-                                        'PEL',          'DEL',         'CRA',      'DIS'
-                                    ]
+        self.annotationChanged = False
+        self.size_lbImg = (1041, 831) 
+        
+        # self.categoryIndex = [  'BiologicalColonization',                  'Plant',          'Discoloration',              'Crust&Deposit',
+        #                         'Subflorescence & Efflorescence',       'Graffiti',          'Alveolization',                    'Erosion',
+        #                         'Peeling',                          'Delamination',                  'Crack',             'Disintegration']
+        # self.categoryIndexForShort = [  'COL',          'PLT',         'CHR',     'CRU',
+        #                                 'SNE',          'GRA',         'ALV',     'ERO',
+        #                                 'PEL',          'DEL',         'CRA',      'DIS']
+        # self.colorIndex = [ [196.36, 182.69, 100.75774],    [108.79, 114.33, 55.32],    [206.8, 130.08, 131.81],    [248.904, 92.56, 200.51],
+        #                     [156.76, 47.006, 79.201],       [131.24, 105.24, 145.38],   [192.83, 11.103, 253.69],   [252.85, 235.66, 83.937],
+        #                     [150.046, 216.47, 203.75],      [40.367, 155.43, 218.26],   [254.99, 120.09, 32.34],    [25.5, 241.7, 10.47]]    
+        self.categoryIndex = [  'Smoke Detector',                  'Alarm Button',          'Fire Extinguisher',              'Ceiling Light',
+                                'FM Power Point (Plug)',       'Command Point (Switch)',          'Security Cameras']
+        self.categoryIndexForShort = [  'SDT',          'ABT',         'FEX',     'LGT',
+                                        'PLUG',          'SWT',         'CAM']
         self.colorIndex = [ [196.36, 182.69, 100.75774],    [108.79, 114.33, 55.32],    [206.8, 130.08, 131.81],    [248.904, 92.56, 200.51],
-                            [156.76, 47.006, 79.201],       [131.24, 105.24, 145.38],   [192.83, 11.103, 253.69],   [252.85, 235.66, 83.937],
-                            [150.046, 216.47, 203.75],      [40.367, 155.43, 218.26],   [254.99, 120.09, 32.34],    [25.5, 241.7, 10.47]
-                            ]    
+                            [156.76, 47.006, 79.201],       [131.24, 105.24, 145.38],   [192.83, 11.103, 253.69]]
+
         self.AnnotationWindow = AnnotationWindow(self)
         self.directory = False
         self.regionOfInterest = None
@@ -147,13 +153,14 @@ class MyWindow(QMainWindow, Ui_MainWindow):
             self.loggingMain(f'Please click [File] - [Open] to load files first.')
 
     def annotateImagefromText(self):
-        self.annotatedImage = Image.open(self.curretImageDirection).resize((640, 640))
+        self.annotatedImage = Image.open(self.curretImageDirection).resize(self.size_lbImg)
+        self.annotatedImage = self.annotatedImage.convert('RGB')
         for key in self.annotationContentDict.keys():
             category = self.annotationContentDict[key][0]
-            x = int(self.annotationContentDict[key][1] * 640)
-            y = int(self.annotationContentDict[key][2] * 640)
-            w = int(self.annotationContentDict[key][3] * 640)
-            h = int(self.annotationContentDict[key][4] * 640)
+            x = int(self.annotationContentDict[key][1] * self.size_lbImg[0])
+            y = int(self.annotationContentDict[key][2] * self.size_lbImg[1])
+            w = int(self.annotationContentDict[key][3] * self.size_lbImg[0])
+            h = int(self.annotationContentDict[key][4] * self.size_lbImg[1])
             xmin = x - w//2
             ymin = y - h//2
             xmax = x + w//2
@@ -170,18 +177,13 @@ class MyWindow(QMainWindow, Ui_MainWindow):
         draw = ImageDraw.Draw(self.annotatedImage)
         outline = tuple(map(int, self.colorIndex[self.categoryIndex.index(category)]))
         draw.rectangle([xmin, ymin, xmax, ymax], outline=outline, width=5)
-        draw.text((xmin+5 , ymin+3),
-                    self.categoryIndexForShort[self.categoryIndex.index(category)],
-                    fill=outline,
-                    font= ImageFont.truetype("arial.ttf", 20))
-        xcenter = (xmin+xmax)/2 - 20
-        ycenter = (ymin+ymax)/2 - 20
-        draw.text((xcenter,ycenter), str(key), fill=outline, font= ImageFont.truetype("arial.ttf", 40))
+        draw.text((xmin+5 , ymin+3), self.categoryIndexForShort[self.categoryIndex.index(category)], fill=outline, font= ImageFont.truetype("arial.ttf", 10))
+        draw.text((xmax-30, ymax-30), str(key), fill=outline, font= ImageFont.truetype("arial.ttf", 20))
        
     def plotImage(self, image2plot):
-        if image2plot.size != (640, 640):
-            self.loggingMain(f'Orginal image size is {image2plot.size}. Resized to (640, 640).')
-            image2plot.resize((640, 640))
+        if image2plot.size != self.size_lbImg:
+            self.loggingMain(f'Orginal image size is {image2plot.size}. Resized to ({self.size_lbImg[0],self.size_lbImg[1]}).')
+            image2plot.resize(self.size_lbImg)
         image2plot = ImageQt.ImageQt(image2plot)
         image2plot = QPixmap.fromImage(image2plot)
         self.lbImg.setPixmap(image2plot)
@@ -226,13 +228,13 @@ class MyWindow(QMainWindow, Ui_MainWindow):
         if self.pushButtonAnnotation.text() == 'Hide Annotation':    # Only works when the annotation is shown
             posSelectImage = event.position().toPoint().toTuple()     # Get the position of the mouse click
             x_SelectedImage = posSelectImage[0]-10
-            y_SelectedImage = posSelectImage[1]-10
-            if x_SelectedImage<640 and y_SelectedImage<640:
+            y_SelectedImage = posSelectImage[1]-30
+            if x_SelectedImage<self.size_lbImg[0] and y_SelectedImage<self.size_lbImg[1]:    # if the click is inside the image
                 for key in self.annotationContentDict.keys():
-                    x = int(self.annotationContentDict[key][1] * 640)
-                    y = int(self.annotationContentDict[key][2] * 640)
-                    w = int(self.annotationContentDict[key][3] * 640)
-                    h = int(self.annotationContentDict[key][4] * 640)
+                    x = int(self.annotationContentDict[key][1] * self.size_lbImg[0])
+                    y = int(self.annotationContentDict[key][2] * self.size_lbImg[1])
+                    w = int(self.annotationContentDict[key][3] * self.size_lbImg[0])
+                    h = int(self.annotationContentDict[key][4] * self.size_lbImg[1])
                     xmin = x - w//2
                     ymin = y - h//2
                     xmax = x + w//2
@@ -249,10 +251,10 @@ class MyWindow(QMainWindow, Ui_MainWindow):
             if decision == 'Deleted':
                 self.loggingMain(f'No annotation is made.')                
             else:
-                x = self.regionOfInterest[0]/640 + (self.regionOfInterest[2]-self.regionOfInterest[0])/1280
-                y = self.regionOfInterest[1]/640 + (self.regionOfInterest[3]-self.regionOfInterest[1])/1280
-                w = (self.regionOfInterest[2]-self.regionOfInterest[0])/640
-                h = (self.regionOfInterest[3]-self.regionOfInterest[1])/640
+                x = self.regionOfInterest[0]/self.size_lbImg[0] + (self.regionOfInterest[2]-self.regionOfInterest[0])/self.size_lbImg[0]/2
+                y = self.regionOfInterest[1]/self.size_lbImg[1] + (self.regionOfInterest[3]-self.regionOfInterest[1])/self.size_lbImg[1]/2
+                w = (self.regionOfInterest[2]-self.regionOfInterest[0])/self.size_lbImg[0]
+                h = (self.regionOfInterest[3]-self.regionOfInterest[1])/self.size_lbImg[1]
                 self.annotationContentDict[self.annotatingKey] = [decision, x, y, w, h]
                 self.writeText()
                 self.annotateImagefromText()
@@ -323,16 +325,16 @@ class MyWindow(QMainWindow, Ui_MainWindow):
     def mousePressEvent(self, event):
         if self.pushButtonAnnotation.text() == 'Hide Annotation':
             self.regionOfInterest_startpoint = event.position().toPoint()
-            self.rubberBandAnnotation.setGeometry(self.regionOfInterest_startpoint.x()-5, self.regionOfInterest_startpoint.y()-15, 0, 0)
+            self.rubberBandAnnotation.setGeometry(self.regionOfInterest_startpoint.x()-10, self.regionOfInterest_startpoint.y()-30, 0, 0)
             self.rubberBandAnnotation.show()
 
     def mouseMoveEvent(self, event):
         if self.pushButtonAnnotation.text() == 'Hide Annotation':
             if self.regionOfInterest_startpoint:
-                selectdRect = QRect(self.regionOfInterest_startpoint.x()-5,
-                                    self.regionOfInterest_startpoint.y()-15,
-                                    event.position().toPoint().x() - self.regionOfInterest_startpoint.x()-5,
-                                    event.position().toPoint().y() - self.regionOfInterest_startpoint.y()-15
+                selectdRect = QRect(self.regionOfInterest_startpoint.x()-10,    #exact the position
+                                    self.regionOfInterest_startpoint.y()-30,
+                                    event.position().toPoint().x() - self.regionOfInterest_startpoint.x(),     #relative size
+                                    event.position().toPoint().y() - self.regionOfInterest_startpoint.y()
                                     )
                 self.rubberBandAnnotation.setGeometry(selectdRect.normalized())
 
@@ -341,7 +343,7 @@ class MyWindow(QMainWindow, Ui_MainWindow):
             selectedRect = self.rubberBandAnnotation.geometry()
             imageRect = self.lbImg.geometry()
             rectIntersected = selectedRect.intersected(imageRect)
-            if selectedRect.isValid() and rectIntersected.width() > 40 and rectIntersected.height() > 40:
+            if selectedRect.isValid() and rectIntersected.width() > 10 and rectIntersected.height() > 10:
                 self.regionOfInterest = rectIntersected.getCoords()
                 self.loggingMain(f'New boundingbox is made, double click button [+] to add the annotatation.')
             else:
@@ -353,10 +355,10 @@ class MyWindow(QMainWindow, Ui_MainWindow):
             #if yes, then the annotation is not added
             #if no, then the annotation is added
             annotationPermission = True
-            xminbb = (self.regionOfInterest[0]-10)/640
-            yminbb = (self.regionOfInterest[1]-10)/640
-            xmaxbb = (self.regionOfInterest[2]-10)/640
-            ymaxbb = (self.regionOfInterest[3]-10)/640
+            xminbb = (self.regionOfInterest[0]-10)/self.size_lbImg[0]
+            yminbb = (self.regionOfInterest[1]-10)/self.size_lbImg[1]
+            xmaxbb = (self.regionOfInterest[2]-10)/self.size_lbImg[0]
+            ymaxbb = (self.regionOfInterest[3]-10)/self.size_lbImg[1]
             bbNew = [xminbb, yminbb, xmaxbb, ymaxbb]
             for key in self.annotationContentDict.keys():
                 xminanno = self.annotationContentDict[key][1] - self.annotationContentDict[key][3]/2
