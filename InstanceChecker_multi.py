@@ -1,10 +1,11 @@
-from PySide6.QtWidgets import QApplication, QMainWindow, QPushButton, QLabel, QVBoxLayout, QLineEdit, QFileDialog, QTextBrowser, QWidget, QMessageBox, QRubberBand
+from PySide6.QtWidgets import QApplication, QMainWindow, QGraphicsScene, QPushButton, QLabel, QVBoxLayout, QLineEdit, QFileDialog, QTextBrowser, QWidget, QMessageBox, QRubberBand
 from PySide6.QtCore import Qt, Signal, QRect, QSize
 import os
-from PySide6.QtGui import QPixmap, QIcon
-from UI.Ui_WindowMain import Ui_MainWindow
+from PySide6.QtGui import QPixmap, QIcon, QActionGroup, QPainter
+from UI.Ui_WindowMain_multi import Ui_MainWindow
 from UI.Ui_WindowAnnotation import Ui_AnnotationWindow
 from PIL import Image, ImageQt, ImageDraw, ImageFont
+from shapeDraft import AnchorPoint, PolygonBuilder
 
 # import sys
 # if getattr(sys, 'frozen', False):
@@ -44,16 +45,26 @@ class MyWindow(QMainWindow, Ui_MainWindow):
         # self.colorIndex = [ [196.36, 182.69, 100.75774],    [108.79, 114.33, 55.32],    [206.8, 130.08, 131.81],    [248.904, 92.56, 200.51],
         #                     [156.76, 47.006, 79.201],       [131.24, 105.24, 145.38],   [192.83, 11.103, 253.69]]
 
+        self.annotationMethod_action_group = QActionGroup(self)
+        self.annotationMethod_action_group.addAction(self.actionNormal_box)
+        self.annotationMethod_action_group.addAction(self.actionOriented_box)
+        self.annotationMethod_action_group.addAction(self.actionEllipse)
+        self.annotationMethod_action_group.addAction(self.action4_side_polygon)
+        self.annotationMethod_action_group.addAction(self.actionMulti_side_polygon)
+        self.annotationMethod_action_group.setExclusive(True)
+        self.graphicsViewAnnotation = PolygonBuilder() 
+        self.annotationMethod = 1
+        if self.annotationMethod:
+            self.annotationMethod_action_group.actions()[self.annotationMethod-1].setChecked(True)
+            print(f'annotation method is {self.annotationMethod}')
+            self.annotationMtethodPreparation(self.annotationMethod)       
         self.AnnotationWindow = AnnotationWindow(self)
-        self.directory = False
-        self.regionOfInterest = None
-        self.rubberBandAnnotation = QRubberBand(QRubberBand.Rectangle, self.lbImg)
-        self.rubberBandAnnotation.setStyleSheet("border: 2px solid red;")
-        self.regionOfInterest_startpoint = None
+        self.directory = False        
         self.thresholdIoU = 0.5
         self.bind()
   
     def bind(self):
+        self.annotationMethod_action_group.triggered.connect(self.selectAnnotation)      
         self.actionOpen.triggered.connect(self.openFile)
         self.actionQuit.triggered.connect(self.close)
         self.actionUser_Manual.triggered.connect(self.showManual)
@@ -83,6 +94,37 @@ class MyWindow(QMainWindow, Ui_MainWindow):
     def loggingMain(self, text):
         self.plainTextEditLog.appendPlainText(text)
         self.plainTextEditLog.verticalScrollBar().setValue(self.plainTextEditLog.verticalScrollBar().maximum())
+
+    def selectAnnotation(self, action):
+        annotationList = ['Normal box', 'Oriented box', 'Ellipse', '4-side polygon', 'Multi-side polygon']
+        selectedAction = self.annotationMethod_action_group.checkedAction()
+        selectedMethod = annotationList.index(selectedAction.text()) + 1
+        if selectedMethod != self.annotationMethod:
+            self.annotationMethod = selectedMethod
+            self.annotationMtethodPreparation(self.annotationMethod)
+
+    def annotationMtethodPreparation(self, method):
+        self.loggingMain(f'Annotation method is set to {self.annotationMethod_action_group.checkedAction().text()}.')
+        if method == 1:    #Normal box
+            # self.graphicsViewAnnotation.setAttribute(Qt.WA_TransparentForMouseEvents, True)     #  
+            self.graphicsViewAnnotation.lower()  # 确保 QLabel 在底部
+            self.lbImg.raise_()  # 将 QGraphicsView 提到最顶层
+            self.graphicsViewAnnotation.enabled = False
+            self.regionOfInterest = None
+            self.rubberBandAnnotation = QRubberBand(QRubberBand.Rectangle, self.lbImg)
+            self.rubberBandAnnotation.setStyleSheet("border: 2px solid red;")
+            self.regionOfInterest_startpoint = None
+            print('annotation for normal box is activated')
+        if method == 2:    #Oriented box
+            pass
+        if method == 3:     #Ellipse
+            pass
+        if method == 4 or method == 5:     #4-side polygon or Multi-side polygon 
+            self.graphicsViewAnnotation = PolygonBuilder(method)               
+            self.lbImg.setAttribute(Qt.WA_TransparentForMouseEvents, True)
+            self.graphicsViewAnnotation.raise_()  # 将 QGraphicsView 提到最顶层
+            self.lbImg.lower()  # 确保 QLabel 在底部            
+            print('annotation for polygon is activated')
 
     def openFile(self):
         self.directory = QFileDialog.getExistingDirectory(self, "Select Directory")
@@ -125,17 +167,27 @@ class MyWindow(QMainWindow, Ui_MainWindow):
         for i,line in enumerate(rawText.split('\n')):
             if line:
                 line = line.split(' ')
-                category = int(line[0])
-                x = float(line[1])
-                y = float(line[2])
-                w = float(line[3])
-                h = float(line[4])
-                #the dict contains the category:str, x:float, y, w, h of the annotation
-                self.annotationContentDict[i] = [self.categoryIndex[category], x, y, w, h]     
+                if len(line) == 5:                          #for normal box, category:str, x:float, y, w, h of the annotation
+                    category = int(line[0])
+                    x = float(line[1])
+                    y = float(line[2])
+                    w = float(line[3])
+                    h = float(line[4])
+                    self.annotationContentDict[i] = [self.categoryIndex[category], x, y, w, h]   
+                elif len(line) == 6:                         #for oriented box and ellipse, category:str, x:float, y, w, h, theta:int of the annotation
+                    category = int(line[0])
+                    x = float(line[1])
+                    y = float(line[2])
+                    w = float(line[3])
+                    h = float(line[4])
+                    theta = int(line[5])
+                    self.annotationContentDict[int(line[5])] = [self.categoryIndex[category], x, y, w, h, theta]  
+                elif len(line) >= 9 and len(line) % 2 == 1:                 #for multi-side polygon, category:str, x1:float, y1, x2, y2, x3, y3, ... of the annotation
+                    category = int(line[0])
+                    self.annotationContentDict[i] = [self.categoryIndex[category]]
+                    self.annotationContentDict[i].extend([float(line[j]) for j in range(1, len(line))])
         self.writeText()
         self.annotateImagefromText()
-
-
 
     def writeText(self):
         content = 'Annotation Content:\n\n'
@@ -158,16 +210,36 @@ class MyWindow(QMainWindow, Ui_MainWindow):
         self.annotatedImage = Image.open(self.curretImageDirection).resize(self.size_lbImg)
         self.annotatedImage = self.annotatedImage.convert('RGB')
         for key in self.annotationContentDict.keys():
-            category = self.annotationContentDict[key][0]
-            x = int(self.annotationContentDict[key][1] * self.size_lbImg[0])
-            y = int(self.annotationContentDict[key][2] * self.size_lbImg[1])
-            w = int(self.annotationContentDict[key][3] * self.size_lbImg[0])
-            h = int(self.annotationContentDict[key][4] * self.size_lbImg[1])
-            xmin = x - w//2
-            ymin = y - h//2
-            xmax = x + w//2
-            ymax = y + h//2
-            self.drawRectangularsonImage(key, category, xmin, ymin, xmax, ymax)
+            if len(self.annotationContentDict[key]) == 5:
+                category = self.annotationContentDict[key][0]
+                x = int(self.annotationContentDict[key][1] * self.size_lbImg[0])
+                y = int(self.annotationContentDict[key][2] * self.size_lbImg[1])
+                w = int(self.annotationContentDict[key][3] * self.size_lbImg[0])
+                h = int(self.annotationContentDict[key][4] * self.size_lbImg[1])
+                xmin = x - w//2
+                ymin = y - h//2
+                xmax = x + w//2
+                ymax = y + h//2
+                self.drawRectangularsonImage(key, category, xmin, ymin, xmax, ymax)
+            elif len(self.annotationContentDict[key]) == 6:
+                category = self.annotationContentDict[key][0]
+                x = int(self.annotationContentDict[key][1] * self.size_lbImg[0])
+                y = int(self.annotationContentDict[key][2] * self.size_lbImg[1])
+                w = int(self.annotationContentDict[key][3] * self.size_lbImg[0])
+                h = int(self.annotationContentDict[key][4] * self.size_lbImg[1])
+                theta = self.annotationContentDict[key][5]
+                if self.annotationMethod == 2:                  
+                    self.drawOrientedBoxonImage(key, category, x, y, w, h, theta)
+                elif self.annotationMethod == 3:
+                    self.drawEllipseonImage(key, category, x, y, w, h, theta)
+            elif len(self.annotationContentDict[key]) >= 9 and len(self.annotationContentDict[key]) % 2 == 1:
+                category = self.annotationContentDict[key][0]
+                points = []
+                for i in range(1, len(self.annotationContentDict[key]), 2):
+                    x = int(self.annotationContentDict[key][i] * self.size_lbImg[0])
+                    y = int(self.annotationContentDict[key][i+1] * self.size_lbImg[1])
+                    points.extend([x, y])
+                self.drawMultiSidePolygononImage(key, category, *points)
 
     def drawRectangularsonImage(self, key, category, xmin, ymin, xmax, ymax):
         '''
@@ -179,17 +251,40 @@ class MyWindow(QMainWindow, Ui_MainWindow):
         draw = ImageDraw.Draw(self.annotatedImage)
         outline = tuple(map(int, self.colorIndex[self.categoryIndex.index(category)]))
         draw.rectangle([xmin, ymin, xmax, ymax], outline=outline, width=5)
-        draw.text((xmin+5 , ymin+3), self.categoryIndexForShort[self.categoryIndex.index(category)], fill=outline, font= ImageFont.truetype("arial.ttf", 10))
-        draw.text((xmax-30, ymax-30), str(key), fill=outline, font= ImageFont.truetype("arial.ttf", 20))
-       
+        cx = (xmin + xmax) / 2
+        cy = (ymin + ymax) / 2
+        txt = f'{self.categoryIndexForShort[self.categoryIndex.index(category)]}'
+        draw.text((cx-20,cy-10), txt,fill=outline, font= ImageFont.truetype("arial.ttf", 10))
+        draw.text((cx+10,cy-15), str(key), fill=outline, font= ImageFont.truetype("arial.ttf", 20))
+
+    def drawOrientedBoxonImage(self, key, category, x, y, w, h, theta):
+        pass
+
+    def drawEllipseonImage(self, key, category, x, y, w, h, theta):
+        pass
+
+    def drawMultiSidePolygononImage(self, key, category, *points):
+        '''
+        draw polygons with multiple sides (including 4-side) on the image with the category and the key
+        '''
+        draw = ImageDraw.Draw(self.annotatedImage)
+        outline = tuple(map(int, self.colorIndex[self.categoryIndex.index(category)]))
+        points_pairs = [(points[i], points[i+1]) for i in range(0, len(points), 2)]
+        draw.polygon(points_pairs, outline=outline, width=5) 
+        cx = sum([point[0] for point in points_pairs]) / len(points_pairs)
+        cy = sum([point[1] for point in points_pairs]) / len(points_pairs)
+        txt = f'{self.categoryIndexForShort[self.categoryIndex.index(category)]}'
+        draw.text((cx-20,cy-10), txt,fill=outline, font= ImageFont.truetype("arial.ttf", 10))
+        draw.text((cx+10,cy-15), str(key), fill=outline, font= ImageFont.truetype("arial.ttf", 20))
+
     def plotImage(self, image2plot):
         if image2plot.size != self.size_lbImg:
             self.loggingMain(f'Orginal image size is {image2plot.size}. Resized to ({self.size_lbImg[0],self.size_lbImg[1]}).')
             image2plot.resize(self.size_lbImg)
         image2plot = ImageQt.ImageQt(image2plot)
-        image2plot = QPixmap.fromImage(image2plot)
-        self.lbImg.setPixmap(image2plot)
-
+        pixmap = QPixmap.fromImage(image2plot)
+        self.lbImg.setPixmap(pixmap)
+     
     def nextImage(self):
         if self.directory:
             if not self.annotationChanged:
@@ -233,15 +328,15 @@ class MyWindow(QMainWindow, Ui_MainWindow):
             y_SelectedImage = posSelectImage[1]-30
             if x_SelectedImage<self.size_lbImg[0] and y_SelectedImage<self.size_lbImg[1]:    # if the click is inside the image
                 for key in self.annotationContentDict.keys():
-                    x = int(self.annotationContentDict[key][1] * self.size_lbImg[0])
-                    y = int(self.annotationContentDict[key][2] * self.size_lbImg[1])
-                    w = int(self.annotationContentDict[key][3] * self.size_lbImg[0])
-                    h = int(self.annotationContentDict[key][4] * self.size_lbImg[1])
-                    xmin = x - w//2
-                    ymin = y - h//2
-                    xmax = x + w//2
-                    ymax = y + h//2
-                    if xmin < x_SelectedImage < xmax and ymin < y_SelectedImage < ymax:      # if the click is inside the b-box
+                    if len(self.annotationContentDict[key]) < 9:
+                        cx = int(self.annotationContentDict[key][1] * self.size_lbImg[0])
+                        cy = int(self.annotationContentDict[key][2] * self.size_lbImg[1])
+                    else:
+                        points = self.annotationContentDict[key][1:]
+                        cx = sum([points[i] for i in range(0, len(points), 2)]) / len(points) * 2 * self.size_lbImg[0]
+                        cy = sum([points[i+1] for i in range(0, len(points), 2)]) / len(points) * 2 * self.size_lbImg[1]
+                    distance = int(((x_SelectedImage - cx)**2 + (y_SelectedImage - cy)**2)**0.5)   
+                    if distance <= 20:      # if the click is around the center of the annotation
                         self.annotatingKey = key
                         self.sendValueToSub.emit(self.annotatingKey)
                         self.AnnotationWindow.show()
@@ -286,12 +381,15 @@ class MyWindow(QMainWindow, Ui_MainWindow):
             if self.annotationChanged:
                 with open(self.txt_file[self.indexImage], 'w') as file:
                     for key in self.annotationContentDict.keys():
-                        category = self.categoryIndex.index(self.annotationContentDict[key][0])
-                        x = self.annotationContentDict[key][1]
-                        y = self.annotationContentDict[key][2]
-                        w = self.annotationContentDict[key][3]
-                        h = self.annotationContentDict[key][4]
-                        file.write(f'{category} {x} {y} {w} {h}\n')
+                        file.write(f'{self.categoryIndex.index(self.annotationContentDict[key][0])} ')
+                        num_parameters = len(self.annotationContentDict[key])
+                        key_temp = 1
+                        while key_temp < num_parameters:
+                            if key_temp == num_parameters - 1:
+                                file.write(f'{self.annotationContentDict[key][key_temp]}\n')
+                            else:
+                                file.write(f'{self.annotationContentDict[key][key_temp]} ')
+                            key_temp += 1
                 self.pushButtonNext.setEnabled(True)
                 self.pushButtonPrevious.setEnabled(True)
                 self.annotationChanged = False
@@ -320,39 +418,53 @@ class MyWindow(QMainWindow, Ui_MainWindow):
     
     def sendValue(self, value):
         self.sendValueToSub.emit(value)
-
-    def markRegionOfInterest(self):
-        return self.regionOfInterest
-
+       
     def mousePressEvent(self, event):
-        if self.pushButtonAnnotation.text() == 'Hide Annotation':
-            self.regionOfInterest_startpoint = event.position().toPoint()
-            self.rubberBandAnnotation.setGeometry(self.regionOfInterest_startpoint.x()-10, self.regionOfInterest_startpoint.y()-30, 0, 0)
-            self.rubberBandAnnotation.show()
+        event.accept()
+        print('mousePressEvent working')
+        if self.annotationMethod == 1:
+            if self.pushButtonAnnotation.text() == 'Hide Annotation':
+                self.drawNormalBox(event)
+        elif self.annotationMethod == 4 or self.annotationMethod == 5:
+            if self.pushButtonAnnotation.text() == 'Hide Annotation':
+                self.graphicsViewAnnotation.mousePressEvent(event)
+
+    def drawNormalBox(self, event):
+        self.regionOfInterest_startpoint = event.position().toPoint()
+        self.rubberBandAnnotation.setGeometry(self.regionOfInterest_startpoint.x()-10, self.regionOfInterest_startpoint.y()-30, 0, 0)
+        self.rubberBandAnnotation.show()
 
     def mouseMoveEvent(self, event):
-        if self.pushButtonAnnotation.text() == 'Hide Annotation':
-            if self.regionOfInterest_startpoint:
-                selectdRect = QRect(self.regionOfInterest_startpoint.x()-10,    #exact the position
-                                    self.regionOfInterest_startpoint.y()-30,
-                                    event.position().toPoint().x() - self.regionOfInterest_startpoint.x(),     #relative size
-                                    event.position().toPoint().y() - self.regionOfInterest_startpoint.y()
-                                    )
-                self.rubberBandAnnotation.setGeometry(selectdRect.normalized())
+        if self.annotationMethod == 1:
+            if self.pushButtonAnnotation.text() == 'Hide Annotation':
+                if self.regionOfInterest_startpoint:
+                    selectdRect = QRect(self.regionOfInterest_startpoint.x()-10,    #exact the position
+                                        self.regionOfInterest_startpoint.y()-30,
+                                        event.position().toPoint().x() - self.regionOfInterest_startpoint.x(),     #relative size
+                                        event.position().toPoint().y() - self.regionOfInterest_startpoint.y()
+                                        )
+                    self.rubberBandAnnotation.setGeometry(selectdRect.normalized())
+        elif self.annotationMethod == 4 or self.annotationMethod == 5:
+            if self.pushButtonAnnotation.text() == 'Hide Annotation':
+                self.graphicsViewAnnotation.mouseMoveEvent(event)
 
     def mouseReleaseEvent(self, event):
-        if self.pushButtonAnnotation.text() == 'Hide Annotation':
-            selectedRect = self.rubberBandAnnotation.geometry()
-            imageRect = self.lbImg.geometry()
-            rectIntersected = selectedRect.intersected(imageRect)
-            if selectedRect.isValid() and rectIntersected.width() > 10 and rectIntersected.height() > 10:
-                self.regionOfInterest = rectIntersected.getCoords()
-                self.loggingMain(f'New boundingbox is made, double click button [+] to add the annotatation.')
-            else:
-                self.rubberBandAnnotation.close()
+        if self.annotationMethod == 1:
+            if self.pushButtonAnnotation.text() == 'Hide Annotation':
+                selectedRect = self.rubberBandAnnotation.geometry()
+                imageRect = self.lbImg.geometry()
+                rectIntersected = selectedRect.intersected(imageRect)
+                if selectedRect.isValid() and rectIntersected.width() > 10 and rectIntersected.height() > 10:
+                    self.regionOfInterest = rectIntersected.getCoords()
+                    self.loggingMain(f'New boundingbox is made, double click button [+] to add the annotatation.')
+                else:
+                    self.rubberBandAnnotation.close()
+        elif self.annotationMethod == 4 or self.annotationMethod == 5:
+            if self.pushButtonAnnotation.text() == 'Hide Annotation':
+                self.graphicsViewAnnotation.mouseReleaseEvent(event)
 
     def addInstance(self):
-        if self.regionOfInterest:
+        if self.annotationMethod == 1 and self.regionOfInterest:
             #for each annotation, check the intersection over union is over a threshold
             #if yes, then the annotation is not added
             #if no, then the annotation is added
@@ -375,11 +487,12 @@ class MyWindow(QMainWindow, Ui_MainWindow):
             if annotationPermission:
                 self.annotatingKey = len(self.annotationContentDict)
                 self.sendValueToSub.emit('new')
-                self.AnnotationWindow.show()
-            
-
+                self.AnnotationWindow.show()         
         else:
             self.loggingMain(f'Please mark the bounding box first.')
+
+class graphicsViewAnnotation(QGraphicsScene):
+    pass
 
 
 class AnnotationWindow(QWidget, Ui_AnnotationWindow):
