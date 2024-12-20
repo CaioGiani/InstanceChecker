@@ -22,6 +22,7 @@ class AnchorPoint(QGraphicsEllipseItem):
     
     def contains_point(self, x, y):
         """检查指定位置 (x, y) 是否在锚点范围内"""
+        """这里需要解决如果第一点丢失怎么清除缓存"""
         return (self.x() - x) ** 2 + (self.y() - y) ** 2 <= (self.radius ** 2)
 
 class AnnotationBuilder(QGraphicsView):

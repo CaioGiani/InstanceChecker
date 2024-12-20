@@ -21,20 +21,20 @@
     <property name="geometry">
      <rect>
       <x>1060</x>
-      <y>529</y>
+      <y>469</y>
       <width>111</width>
       <height>23</height>
      </rect>
     </property>
     <property name="text">
-     <string>Accpet</string>
+     <string>Accept</string>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButtonAbort">
     <property name="geometry">
      <rect>
       <x>1180</x>
-      <y>529</y>
+      <y>469</y>
       <width>111</width>
       <height>23</height>
      </rect>
@@ -47,7 +47,7 @@
     <property name="geometry">
      <rect>
       <x>1060</x>
-      <y>69</y>
+      <y>9</y>
       <width>231</width>
       <height>451</height>
      </rect>
@@ -82,7 +82,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <property name="geometry">
      <rect>
       <x>1060</x>
-      <y>10</y>
+      <y>790</y>
       <width>231</width>
       <height>24</height>
      </rect>
@@ -95,7 +95,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <property name="geometry">
      <rect>
       <x>1060</x>
-      <y>40</y>
+      <y>820</y>
       <width>111</width>
       <height>24</height>
      </rect>
@@ -108,7 +108,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <property name="geometry">
      <rect>
       <x>1180</x>
-      <y>40</y>
+      <y>820</y>
       <width>111</width>
       <height>24</height>
      </rect>
@@ -121,7 +121,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <property name="geometry">
      <rect>
       <x>1060</x>
-      <y>560</y>
+      <y>500</y>
       <width>231</width>
       <height>281</height>
      </rect>
@@ -148,9 +148,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
    <widget class="QPushButton" name="pushButtonAddInstance">
     <property name="geometry">
      <rect>
-      <x>1070</x>
-      <y>490</y>
-      <width>101</width>
+      <x>1260</x>
+      <y>430</y>
+      <width>21</width>
       <height>20</height>
      </rect>
     </property>
@@ -170,35 +170,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <string>add annotation</string>
     </property>
     <property name="text">
-     <string notr="true" extracomment="add annotation">Add</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="pushButtonRemoveInstance">
-    <property name="geometry">
-     <rect>
-      <x>1180</x>
-      <y>490</y>
-      <width>101</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Arial</family>
-      <pointsize>11</pointsize>
-      <bold>true</bold>
-      <underline>false</underline>
-      <kerning>true</kerning>
-     </font>
-    </property>
-    <property name="toolTip">
-     <string>Add annotation</string>
-    </property>
-    <property name="whatsThis">
-     <string>add annotation</string>
-    </property>
-    <property name="text">
-     <string notr="true" extracomment="add annotation">Remove</string>
+     <string notr="true" extracomment="add annotation">+</string>
     </property>
    </widget>
   </widget>

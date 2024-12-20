@@ -43,19 +43,3 @@ In order to start you have to:
 If you happened to be encountering any problem, you can contact: ` kai.zhang@polimi.it` 
 We will be happy to recieve your comment and suggestion.
 
-### To be Undated
-- [ ] Make possible setting of image size.
-- [ ] Make possible editting the category list.
-
-### How to export the software
-If you want to check the UI, you can [Download QtDesigner](https://build-system.fman.io/qt-designer-download)
-To generate your own executive files, you can go: [Export to macos](https://pythonguis.com/tutorials/packaging-pyside6-applications-pyinstaller-macos-dmg/) and [Export to exe](https://www.pythonguis.com/tutorials/packaging-pyside6-applications-windows-pyinstaller-installforge/)
-> Note: run this in the console: `pyinstaller --onefile --noconsole --icon=docs/Checker.ico  --name "InstanceChecker" InstanceChecker_roi.py` to generate only one exe file for windows.
-
-<!--
-
-### Features and Functionality
-### Advanced
-### Troubleshooting
-
--->

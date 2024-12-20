@@ -29,24 +29,23 @@ class MyWindow(QMainWindow, Ui_MainWindow):
         self.annotationChanged = False
         self.size_view = (1041, 831) 
         ''' 这里可以看看怎么用yaml文件来存储这些信息'''
-        # self.categoryIndex = [  'BiologicalColonization',                  'Plant',          'Discoloration',              'Crust&Deposit',
-        #                         'Subflorescence & Efflorescence',       'Graffiti',          'Alveolization',                    'Erosion',
-        #                         'Peeling',                          'Delamination',                  'Crack',             'Disintegration']
-        # self.categoryIndexForShort = [  'COL',          'PLT',         'CHR',     'CRU',
-        #                                 'SNE',          'GRA',         'ALV',     'ERO',
-        #                                 'PEL',          'DEL',         'CRA',      'DIS']
-        # self.colorIndex = [ [196.36, 182.69, 100.75774],    [108.79, 114.33, 55.32],    [206.8, 130.08, 131.81],    [248.904, 92.56, 200.51],
-        #                     [156.76, 47.006, 79.201],       [131.24, 105.24, 145.38],   [192.83, 11.103, 253.69],   [252.85, 235.66, 83.937],
-        #                     [150.046, 216.47, 203.75],      [40.367, 155.43, 218.26],   [254.99, 120.09, 32.34],    [25.5, 241.7, 10.47]]   
-        
-        #  
-        self.categoryIndex = [  'Smoke Detector',                  'Alarm Button',          'Fire Extinguisher',              'Ceiling Light',
-                                'FM Power Point (Plug)',       'Command Point (Switch)',          'Security Cameras']
-        self.categoryIndexForShort = [  'SDT',          'ABT',         'FEX',     'LGT',
-                                        'PLUG',          'SWT',         'CAM']
-        self.colorIndex = [ [196.36, 182.69, 100.75774],    [108.79, 114.33, 55.32],    [206.8, 130.08, 131.81],    [248.904, 92.56, 200.51],
-                            [156.76, 47.006, 79.201],       [131.24, 105.24, 145.38],   [192.83, 11.103, 253.69]]
-                            
+        self.colorIndex = ('#FF3838', '#FF9D97', '#FF701F', '#FFB21D', '#CFD231', '#48F90A', '#92CC17', '#3DDB86', '#1A9334', '#00D4BB',
+                            '#2C99A8', '#00C2FF', '#344593', '#6473FF', '#0018EC', '#8438FF', '#520085', '#CB38FF', '#FF95C8', '#FF37C7')
+        # #这个index可能可以复用，需要研究一下。一共20个，是YoloV5的颜色
+
+        self.categoryIndex = [  'BiologicalColonization',                  'Plant',          'Discoloration',              'Crust&Deposit',
+                                'Subflorescence & Efflorescence',       'Graffiti',          'Alveolization',                    'Erosion',
+                                'Peeling',                          'Delamination',                  'Crack',             'Disintegration']
+        self.categoryIndexForShort = [  'COL',          'PLT',         'CHR',     'CRU',
+                                        'SNE',          'GRA',         'ALV',     'ERO',
+                                        'PEL',          'DEL',         'CRA',      'DIS']
+   
+         
+        # self.categoryIndex = [  'Smoke Detector',                  'Alarm Button',          'Fire Extinguisher',              'Ceiling Light',
+        #                         'FM Power Point (Plug)',       'Command Point (Switch)',          'Security Cameras']
+        # self.categoryIndexForShort = [  'SDT',          'ABT',         'FEX',     'LGT',
+        #                                 'PLUG',          'SWT',         'CAM']
+                     
 
 
         self.directory = False 
@@ -62,12 +61,11 @@ class MyWindow(QMainWindow, Ui_MainWindow):
         self.annotationMethod_action_group.setExclusive(True)
         self.annotationMethod = 4
         self.annotationMethod_action_group.actions()[self.annotationMethod-1].setChecked(True)
-        self.annotationMtethodPreparation(self.annotationMethod)
+        self.annotationMethodPreparation(self.annotationMethod)
         print(f'annotation method is {self.annotationMethod}')     
         self.AnnotationWindow = AnnotationWindow(self)    
         self.thresholdIoU = 0.5
         self.bind()
-
   
     def bind(self):
         self.annotationMethod_action_group.triggered.connect(self.selectAnnotation)      
@@ -88,8 +86,8 @@ class MyWindow(QMainWindow, Ui_MainWindow):
         textInformation += "1. Click [File] - [Open] to load the folder of the images and txt files.\n\n"
         textInformation += "2. Click 'Show && Edit Annotation' to show the annotation of the current image.\n"
         textInformation += "   You can double click an existing box to edit previous annotation.\n\n"
-        textInformation += "3. You can also drag a box and click [+] to add new annotation.\n"
-        textInformation += "   Notice that the new annotation will not be added if the overlap is over 0.5.\n\n"
+        textInformation += "3. You can also make an annotation and click [+] to add new object.\n"
+        textInformation += "   Notice that the new annotation should not be added if the overlap is over 0.5.\n\n"
         textInformation += "4. Click [Accept] or [Abort] to save or cancel the modification.\n\n"
         textInformation += "5. Click 'Next' or 'Previous' to switch to the next or previous image.\n\n"
         # textInformation += "6. \n\n"
@@ -106,10 +104,12 @@ class MyWindow(QMainWindow, Ui_MainWindow):
         selectedAction = self.annotationMethod_action_group.checkedAction()
         selectedMethod = annotationList.index(selectedAction.text()) + 1
         if selectedMethod != self.annotationMethod:
-            self.annotationMethod = selectedMethod
-            self.annotationMtethodPreparation(self.annotationMethod)
+            self.loggingMain('changing annotation is not allowed in current version.')
+            self.annotationMethod_action_group.actions()[self.annotationMethod-1].setChecked(True)
+            # self.annotationMethod = selectedMethod
+            # self.annotationMethodPreparation(self.annotationMethod)
 
-    def annotationMtethodPreparation(self, method):
+    def annotationMethodPreparation(self, method):
         self.loggingMain(f'Annotation method is set to {self.annotationMethod_action_group.checkedAction().text()}.')
         self.graphicsViewAnnotation.reset()
         self.regionOfInterest = None
@@ -127,20 +127,22 @@ class MyWindow(QMainWindow, Ui_MainWindow):
             pass
         if method == 3:     #Ellipse
             pass
-        if method == 4 or method == 5:     #4-side polygon or Multi-side polygon 
-            self.graphicsViewAnnotation.sideLimitation = method
-            # self.graphicsViewAnnotation = AnnotationBuilder(method)              
+        if method == 4:     #4-side polygon
+            self.graphicsViewAnnotation.sideLimitation = method            
             print('annotation for polygon is activated')
-
+        if method == 5:     #Multi-side polygon
+            self.graphicsViewAnnotation.sideLimitation = None
+            print('annotation for multi side polygon is activated')
+        
     def openFile(self):
         self.directory = QFileDialog.getExistingDirectory(self, "Select Directory")
-        self.annoationChanged = False
+        self.annotationChanged = False
         if self.directory:
             file_list = []
             txt_file = []
             list_files = os.listdir(self.directory)
             for file in list_files:
-                if file.endswith('.jpg') or file.endswith('.png') or file.endswith('.jpeg'):
+                if file.endswith(('.jpg','.png','.jpeg','.JPG','.PNG','.JPEG')):
                     file_list.append(self.directory + '/' + file)
             for file in file_list:
                 checkTxtDirection = (os.path.splitext(file)[0] + '.txt')
@@ -270,13 +272,17 @@ class MyWindow(QMainWindow, Ui_MainWindow):
         xmin, ymin, xmax, ymax: int, the coordinates of the rectangular
         '''
         draw = ImageDraw.Draw(self.annotatedImage)
-        outline = tuple(map(int, self.colorIndex[self.categoryIndex.index(category)]))
+        outline = self.colorIndex[self.categoryIndex.index(category)]
         draw.rectangle([xmin, ymin, xmax, ymax], outline=outline, width=5)
         cx = (xmin + xmax) / 2
         cy = (ymin + ymax) / 2
-        txt = f'{self.categoryIndexForShort[self.categoryIndex.index(category)]}'
-        draw.text((cx-20,cy-10), txt,fill=outline, font= ImageFont.truetype("arial.ttf", 10))
-        draw.text((cx+10,cy-15), str(key), fill=outline, font= ImageFont.truetype("arial.ttf", 20))
+        txt = f'{self.categoryIndexForShort[self.categoryIndex.index(category)]} No.{key}'
+
+        font = ImageFont.truetype("arial.ttf", 15)
+        text_bbox = draw.textbbox((cx-35,cy-10), txt, font=font)
+        text_background = (text_bbox[0]-2, text_bbox[1]-2, text_bbox[2]+2, text_bbox[3]+2)
+        draw.rectangle(text_background, fill=outline)
+        draw.text((cx-35,cy-10), txt,fill='black', font=font)
 
     def drawOrientedBoxonImage(self, key, category, x, y, w, h, theta):
         pass
@@ -289,21 +295,27 @@ class MyWindow(QMainWindow, Ui_MainWindow):
         draw polygons with multiple sides (including 4-side) on the image with the category and the key
         '''
         draw = ImageDraw.Draw(self.annotatedImage)
-        outline = tuple(map(int, self.colorIndex[self.categoryIndex.index(category)]))
+        outline = self.colorIndex[self.categoryIndex.index(category)]
         points_pairs = [(points[i], points[i+1]) for i in range(0, len(points), 2)]
         draw.polygon(points_pairs, outline=outline, width=5) 
         cx = sum([point[0] for point in points_pairs]) / len(points_pairs)
         cy = sum([point[1] for point in points_pairs]) / len(points_pairs)
-        txt = f'{self.categoryIndexForShort[self.categoryIndex.index(category)]}'
-        draw.text((cx-20,cy-10), txt,fill=outline, font= ImageFont.truetype("arial.ttf", 10))
-        draw.text((cx+10,cy-15), str(key), fill=outline, font= ImageFont.truetype("arial.ttf", 20))
+        txt = f'{self.categoryIndexForShort[self.categoryIndex.index(category)]} No.{key}'
+        # draw.text((cx-20,cy-10), txt,fill=outline, font= ImageFont.truetype("arial.ttf", 10))
+        # draw.text((cx+10,cy-15), str(key), fill=outline, font= ImageFont.truetype("arial.ttf", 20))
+
+        font = ImageFont.truetype("arial.ttf", 15)
+        text_bbox = draw.textbbox((cx-35,cy-10), txt, font=font)
+        text_background = (text_bbox[0]-2, text_bbox[1]-2, text_bbox[2]+2, text_bbox[3]+2)
+        draw.rectangle(text_background, fill=outline)
+        draw.text((cx-35,cy-10), txt,fill='black', font=font)
 
     def plotImage(self, image2plot):
         if image2plot.size != self.size_view:
             self.loggingMain(f'Orginal image size is {image2plot.size}. Resized to ({self.size_view[0],self.size_view[1]}).')
             image2plot.resize(self.size_view)
         img_bg = QGraphicsPixmapItem(QPixmap.fromImage(ImageQt.ImageQt(image2plot)))
-        self.graphicsViewAnnotation.scene().clear()
+        self.graphicsViewAnnotation.reset()
         self.graphicsViewAnnotation.scene().addItem(img_bg)
      
     def nextImage(self):
@@ -344,6 +356,7 @@ class MyWindow(QMainWindow, Ui_MainWindow):
  
     def modificationAnnotation(self, decision):
         if self.annotatingKey == len(self.annotationContentDict):
+            # The annotation is new
             if decision == 'Deleted':
                 self.loggingMain(f'No annotation is made.')                
             else:
@@ -367,7 +380,9 @@ class MyWindow(QMainWindow, Ui_MainWindow):
                 self.plotImage(self.annotatedImage)
                 self.loggingMain(f'New annotation is added. \nClick Accept to save the change.')
                 self.annotationChanged = True
-        else:            
+            self.regionOfInterest = None
+        else:           
+            # The annotation is not new, but to be modified
             if decision == 'Deleted':
                 del self.annotationContentDict[self.annotatingKey]
                 self.annotationContentDict = dict(enumerate(self.annotationContentDict.values()))
@@ -408,6 +423,7 @@ class MyWindow(QMainWindow, Ui_MainWindow):
                 self.loggingMain(f'No modification is made.')
         else:
             self.loggingMain(f'Please click [File] - [Open] to load files first.')
+        self.graphicsViewAnnotation.reset()
         
     def cancelAnnotationMain(self):
         if self.directory:
@@ -423,8 +439,10 @@ class MyWindow(QMainWindow, Ui_MainWindow):
                 self.loggingMain(f'Annotation is cancelled.')
             else:
                 self.loggingMain(f'No modification is to be canceled.')
+                self.graphicsViewAnnotation.reset()
         else:
             self.loggingMain(f'Please click [File] - [Open] to load files first.')
+        self.graphicsViewAnnotation.reset()
     
     def sendValue(self, value):
         self.sendValueToSub.emit(value)
@@ -500,7 +518,7 @@ class MyWindow(QMainWindow, Ui_MainWindow):
                 self.graphicsViewAnnotation.reset()
                 self.annotatingKey = len(self.annotationContentDict)
                 self.sendValueToSub.emit('new')
-                self.AnnotationWindow.show()    
+                self.AnnotationWindow.show()   
         else:
             self.loggingMain(f'Please mark the bounding box first.')
 
